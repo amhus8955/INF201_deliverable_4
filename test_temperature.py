@@ -1,1 +1,83 @@
+"""
+Pytest tests for the :class:`Temperature` class in ``temperature.py``.
 
+Run with::
+
+    pytest -v test_temperature.py
+"""
+
+import pytest
+
+from temperature import Temperature
+
+# Converted floats are rarely exact, so they are checked with
+# pytest.approx and the same tolerance as in the class.
+TOL: float = 1e-9
+"""Absolute tolerance used when checking converted float values."""
+
+# Reference points as (celsius, fahrenheit, kelvin). pytest.param with
+# an id gives readable test names in the output, e.g. "water_boils".
+REFERENCE_POINTS = [
+    pytest.param(-273.15, -459.67, 0.0, id="absolute_zero"),
+    pytest.param(-40.0, -40.0, 233.15, id="celsius_fahrenheit_crossover"),
+    pytest.param(0.0, 32.0, 273.15, id="water_freezes"),
+    pytest.param(37.0, 98.6, 310.15, id="body_temperature"),
+    pytest.param(100.0, 212.0, 373.15, id="water_boils"),
+]
+
+UNITS: list[str] = ["C", "F", "K"]
+
+
+
+# 1. Initialisation:
+def test_default_unit_is_celsius() -> None:
+    """A temperature created without a unit should be in Celsius."""
+    temp = Temperature(20)
+    assert temp.unit == "C"
+    assert temp.value == 20.0
+
+
+# parametrize runs the same test once for each value, so the test does
+# not have to be copied six times.
+@pytest.mark.parametrize("unit", ["c", "C", "f", "F", "k", "K"])
+def test_unit_is_case_insensitive(unit: str) -> None:
+    """Units should be accepted in any case and stored in upper case."""
+    assert Temperature(300, unit).unit == unit.upper()
+
+
+def test_value_is_stored_as_float() -> None:
+    """An integer value should be stored as a float."""
+    temp = Temperature(25, "C")
+    assert isinstance(temp.value, float)
+    assert temp.value == 25.0
+
+
+def test_value_is_read_only() -> None:
+    """Assigning to ``value`` should raise an AttributeError."""
+    temp = Temperature(25, "C")
+    # pytest.raises makes the test fail if the error does NOT happen.
+    # "type: ignore" tells mypy that the wrong assignment is on purpose.
+    with pytest.raises(AttributeError):
+        temp.value = 30  # type: ignore[misc]
+    # The value must also be unchanged after the failed assignment.
+    assert temp.value == 25.0
+
+
+def test_unit_is_read_only() -> None:
+    """Assigning to ``unit`` should raise an AttributeError."""
+    temp = Temperature(25, "C")
+    with pytest.raises(AttributeError):
+        temp.unit = "F"  # type: ignore[misc]
+    assert temp.unit == "C"
+
+
+
+# 2. Validation:
+# Includes edge cases: an empty string, a full word, a unit with a
+# space in front, and values that are not strings at all.
+@pytest.mark.parametrize("unit", ["X", "", "Celsius", "CF", " C", None, 1])
+def test_invalid_unit_raises_value_error(unit: object) -> None:
+    """Units other than C, F and K should raise a ValueError."""
+    # match checks the error message, so we know it is the right error.
+    with pytest.raises(ValueError, match="Invalid unit"):
+        Temperature(0, unit)  # type: ignore[arg-type]
