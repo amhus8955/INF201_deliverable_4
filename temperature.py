@@ -185,3 +185,144 @@ class Temperature:
         }
         # A new object is returned, because self is read-only.
         return Temperature(converters[target](), target)
+
+    # String representations:
+    def __repr__(self) -> str:
+        """Return an unambiguous representation of the temperature.
+
+        Returns:
+            A string such as ``"Temperature(25.0, 'C')"``.
+        """
+        # !r adds quotes around the unit, so the string looks like the
+        # code that creates the object: Temperature(25.0, 'C').
+        return f"{type(self).__name__}({self._value!r}, {self._unit!r})"
+
+    def __str__(self) -> str:
+        """Return a human-readable string with two decimals.
+
+        Kelvin is an absolute scale and is written without a degree
+        sign, following SI conventions.
+
+        Returns:
+            A string such as ``"25.00 °C"``, ``"77.00 °F"`` or
+            ``"298.15 K"``.
+        """
+        symbol = "K" if self._unit == "K" else f"°{self._unit}"
+        # :.2f rounds the value to two decimals, e.g. 36.666 -> 36.67.
+        return f"{self._value:.2f} {symbol}"
+
+    
+    # Comparisons (done in kelvin, using TOLERANCE):
+    # Both temperatures are converted to kelvin before comparing, so
+    # it does not matter which units they are stored in.
+    def _is_close(self, other: Temperature) -> bool:
+        """Check whether two temperatures are equal within the tolerance.
+
+        Args:
+            other: The temperature to compare with.
+
+        Returns:
+            True if the temperatures differ by at most ``TOLERANCE``
+            kelvin, otherwise False.
+        """
+        # Floats are not exact (0.1 + 0.2 != 0.3 in Python), so == on
+        # floats can fail even when the temperatures are the same.
+        return abs(self.to_kelvin() - other.to_kelvin()) <= TOLERANCE
+
+    def __eq__(self, other: object) -> bool:
+        """Return True if both temperatures are equal within tolerance.
+
+        Args:
+            other: The object to compare with.
+
+        Returns:
+            Whether the temperatures are equal, or ``NotImplemented``
+            if ``other`` is not a :class:`Temperature`.
+        """
+        # NotImplemented (not False) tells Python that we do not know
+        # how to compare with this type, so Python can try the other
+        # object's method instead.
+        if not isinstance(other, Temperature):
+            return NotImplemented
+        return self._is_close(other)
+
+    def __ne__(self, other: object) -> bool:
+        """Return True if the temperatures are not equal within tolerance.
+
+        Args:
+            other: The object to compare with.
+
+        Returns:
+            Whether the temperatures differ, or ``NotImplemented`` if
+            ``other`` is not a :class:`Temperature`.
+        """
+        if not isinstance(other, Temperature):
+            return NotImplemented
+        return not self._is_close(other)
+
+    def __lt__(self, other: object) -> bool:
+        """Return True if this temperature is lower than other.
+
+        Args:
+            other: The object to compare with.
+
+        Returns:
+            Whether ``self < other``, or ``NotImplemented`` if
+            ``other`` is not a :class:`Temperature`.
+        """
+        if not isinstance(other, Temperature):
+            return NotImplemented
+        # Equal within the tolerance means "not lower", even if the
+        # floats differ by a tiny rounding error.
+        if self._is_close(other):
+            return False
+        return self.to_kelvin() < other.to_kelvin()
+
+    def __le__(self, other: object) -> bool:
+        """Return True if this temperature is lower than or equal to other.
+
+        Args:
+            other: The object to compare with.
+
+        Returns:
+            Whether ``self <= other``, or ``NotImplemented`` if
+            ``other`` is not a :class:`Temperature`.
+        """
+        if not isinstance(other, Temperature):
+            return NotImplemented
+        # Equal within the tolerance counts as "lower or equal".
+        if self._is_close(other):
+            return True
+        return self.to_kelvin() < other.to_kelvin()
+
+    def __gt__(self, other: object) -> bool:
+        """Return True if this temperature is higher than other.
+
+        Args:
+            other: The object to compare with.
+
+        Returns:
+            Whether ``self > other``, or ``NotImplemented`` if
+            ``other`` is not a :class:`Temperature`.
+        """
+        if not isinstance(other, Temperature):
+            return NotImplemented
+        if self._is_close(other):
+            return False
+        return self.to_kelvin() > other.to_kelvin()
+
+    def __ge__(self, other: object) -> bool:
+        """Return True if this temperature is higher than or equal to other.
+
+        Args:
+            other: The object to compare with.
+
+        Returns:
+            Whether ``self >= other``, or ``NotImplemented`` if
+            ``other`` is not a :class:`Temperature`.
+        """
+        if not isinstance(other, Temperature):
+            return NotImplemented
+        if self._is_close(other):
+            return True
+        return self.to_kelvin() > other.to_kelvin()
