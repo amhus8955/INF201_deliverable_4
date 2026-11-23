@@ -82,6 +82,43 @@ def test_invalid_unit_raises_value_error(unit: object) -> None:
     with pytest.raises(ValueError, match="Invalid unit"):
         Temperature(0, unit)  # type: ignore[arg-type]
 
+# Each value is just below absolute zero in its own unit.
+@pytest.mark.parametrize(
+    "value, unit",
+    [(-273.16, "C"), (-459.68, "F"), (-0.01, "K"), (-1000, "c")],
+)
+def test_below_absolute_zero_raises_value_error(
+    value: float, unit: str
+) -> None:
+    """Temperatures below 0 K should raise a ValueError in every unit."""
+    with pytest.raises(ValueError, match="below absolute zero"):
+        Temperature(value, unit)
+
+
+# Edge case: exactly 0 K is allowed, only values below it are invalid.
+@pytest.mark.parametrize(
+    "value, unit", [(-273.15, "C"), (-459.67, "F"), (0, "K")]
+)
+def test_exactly_absolute_zero_is_allowed(value: float, unit: str) -> None:
+    """Exactly absolute zero is a valid temperature in every unit."""
+    assert Temperature(value, unit).to_kelvin() == pytest.approx(0, abs=TOL)
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf")])
+def test_non_finite_value_raises_value_error(value: float) -> None:
+    """NaN and infinity are not valid temperatures."""
+    with pytest.raises(ValueError, match="finite"):
+        Temperature(value, "C")
+
+@pytest.mark.parametrize("target_unit", ["X", "", "kelvin", None])
+def test_convert_to_invalid_unit_raises_value_error(
+    target_unit: object,
+) -> None:
+    """``convert_to`` should raise a ValueError for an invalid unit."""
+    with pytest.raises(ValueError, match="Invalid unit"):
+        Temperature(0, "C").convert_to(target_unit)  # type: ignore[arg-type]
+
+
 # 3. Conversions
 # Two parametrize decorators give every combination:
 # 3 start units x 5 reference points = 15 tests.
