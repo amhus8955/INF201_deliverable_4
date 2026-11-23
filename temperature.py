@@ -159,3 +159,29 @@ class Temperature:
             return (self._value - 32) * 5 / 9 + KELVIN_OFFSET
         return self._value
 
+    def convert_to(self, target_unit: str) -> Temperature:
+        """Return a new temperature converted to ``target_unit``.
+
+        The original instance is not changed.
+
+        Args:
+            target_unit: The unit to convert to: ``"C"``, ``"F"`` or
+                ``"K"`` (case-insensitive).
+
+        Returns:
+            A new :class:`Temperature` instance in the target unit.
+
+        Raises:
+            ValueError: If ``target_unit`` is not a valid unit.
+        """
+        target = self._validate_unit(target_unit)
+        # The dictionary links each unit to the method that converts to
+        # it, instead of a long if/elif chain. The methods are stored
+        # without () and called on the last line.
+        converters = {
+            "C": self.to_celsius,
+            "F": self.to_fahrenheit,
+            "K": self.to_kelvin,
+        }
+        # A new object is returned, because self is read-only.
+        return Temperature(converters[target](), target)
