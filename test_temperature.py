@@ -81,3 +81,20 @@ def test_invalid_unit_raises_value_error(unit: object) -> None:
     # match checks the error message, so we know it is the right error.
     with pytest.raises(ValueError, match="Invalid unit"):
         Temperature(0, unit)  # type: ignore[arg-type]
+
+# 3. Conversions
+# Two parametrize decorators give every combination:
+# 3 start units x 5 reference points = 15 tests.
+@pytest.mark.parametrize("celsius, fahrenheit, kelvin", REFERENCE_POINTS)
+@pytest.mark.parametrize("source_unit", UNITS)
+def test_conversion_methods(
+    source_unit: str, celsius: float, fahrenheit: float, kelvin: float
+) -> None:
+    """``to_celsius``, ``to_fahrenheit`` and ``to_kelvin`` are accurate."""
+    # Picks the start value that matches the start unit.
+    values = {"C": celsius, "F": fahrenheit, "K": kelvin}
+    temp = Temperature(values[source_unit], source_unit)
+
+    assert temp.to_celsius() == pytest.approx(celsius, abs=TOL)
+    assert temp.to_fahrenheit() == pytest.approx(fahrenheit, abs=TOL)
+    assert temp.to_kelvin() == pytest.approx(kelvin, abs=TOL)
