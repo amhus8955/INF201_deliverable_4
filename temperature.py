@@ -120,3 +120,42 @@ class Temperature:
             )
         # upper() makes the unit case-insensitive: "c" is stored as "C".
         return unit.upper()
+
+    # Conversions:
+    def to_celsius(self) -> float:
+        """Return the temperature in degrees Celsius.
+
+        Returns:
+            The temperature value converted to Celsius.
+        """
+        if self._unit == "K":
+            return self._value - KELVIN_OFFSET
+        if self._unit == "F":
+            return (self._value - 32) * 5 / 9
+        # Already in Celsius, so no conversion is needed.
+        return self._value
+
+    def to_fahrenheit(self) -> float:
+        """Return the temperature in degrees Fahrenheit.
+
+        Returns:
+            The temperature value converted to Fahrenheit.
+        """
+        if self._unit == "C":
+            return self._value * 9 / 5 + 32
+        if self._unit == "K":
+            return (self._value - KELVIN_OFFSET) * 9 / 5 + 32
+        return self._value
+
+    def to_kelvin(self) -> float:
+        """Return the temperature in kelvin.
+
+        Returns:
+            The temperature value converted to Kelvin.
+        """
+        if self._unit == "C":
+            return self._value + KELVIN_OFFSET
+        if self._unit == "F":
+            return (self._value - 32) * 5 / 9 + KELVIN_OFFSET
+        return self._value
+
