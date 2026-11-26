@@ -1,0 +1,15 @@
+* 42b713d - amhus8955, 2026-11-27 : Add GenAI section
+* d0c6f01 - amhus8955, 2026-11-27 : Add Fraction implementation
+* 55324ec - amhus8955, 2026-11-27 : Add tests for Fraction
+* eeb9507 - amhus8955, 2026-11-26 : Add Fraction class
+* ae0999d - ArthikaVelnathan, 2026-11-23 : Enhance temperature conversion tests
+* d43b9a1 - ArthikaVelnathan, 2026-11-23 : Implement string representation and comparison methods
+* 03a8a6f - ArthikaVelnathan, 2026-11-23 : Implement convert_to method for temperature conversion
+* bc2d844 - ArthikaVelnathan, 2026-11-23 : Update test_temperature.py
+* 5ff5117 - ArthikaVelnathan, 2026-11-23 : adding conversion tests fir reference points
+* f82dac6 - ArthikaVelnathan, 2026-11-23 : Implement temperature conversion methods
+* 068c212 - ArthikaVelnathan, 2026-11-23 : Add pytest tests for Temperature class
+* e5a0668 - ArthikaVelnathan, 2026-11-23 : Implement Temperature class with unit conversions
+* b62f2cd - ArthikaVelnathan, 2026-11-23 : Create test_temperature.py
+* 278b306 - ArthikaVelnathan, 2026-11-23 : Create temperature.py
+* c996092 - amhus8955, 2026-11-23 : Initial commit
